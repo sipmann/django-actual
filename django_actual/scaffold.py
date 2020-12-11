@@ -7,7 +7,6 @@ import shutil
 # VIEW CONSTS
 
 LIST_VIEW = """
-from %(app)s.forms import %(model)sForm
 def %(lower_model)s_list(request, template='%(lower_model)s/list.html'):
     d = {}
     d['form'] = %(model)sForm()
@@ -23,22 +22,32 @@ def %(lower_model)s_list(request, template='%(lower_model)s/list.html'):
     return render(request, template, d)
 """
 
+NEW_VIEW = """
+def %(lower_model)s_new(request, template='%(lower_model)s/details.html'):
+    form = %(model)sForm()
+
+    if request.method == 'POST':
+        form = %(model)sForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('%(app)s:%(model)s-list'))
+
+    return render(request, template, {'form': form})
+"""
+
 DETAILS_VIEW = """
-from %(app)s.forms import %(model)sForm
 def %(lower_model)s_details(request, id, template='%(lower_model)s/details.html'):
-    d = {}
     item = get_object_or_404(%(model)s, pk=id)
-    d['form'] = %(model)sForm(instance=item)
+    form = %(model)sForm(instance=item)
+
     if request.method == 'POST':
         form = %(model)sForm(request.POST, instance=item)
         if form.is_valid():
-            item = form.save()
-            return JsonResponse(data={'form': %(model)sForm(instance=item).as_p(), 'token': get_token(request)})
-        else:
-            d['form'] = form
-            return JsonResponse(data={'form': d['form'].as_p(), 'token': get_token(request)}, success=False)
-    d['%(lower_model)s'] = %(model)s.objects.get(pk=id)
-    return render(request, template, d)
+            form.save()
+            return HttpResponseRedirect(reverse('%(app)s:%(model)s-list'))
+    
+    #d['%(lower_model)s'] = %(model)s.objects.get(pk=id)
+    return render(request, template, {'form': form})
 """
 
 DELETE_VIEW = """
@@ -107,7 +116,8 @@ TEMPLATE_LIST_CONTENT = """
     {%% endfor %%}
     </table>
     <br>
-    <input type="button" onclick="$('#add-form-div').toggle();" value="Add new %(model)s"><b><br>
+    <a href="{%% url '%(app)s:%(model)s-new' %%}" >Add new %(model)s </a>
+    <br>
     <div id="add-form-div" style="display: none;">
         <form action="{%% url '%(app)s:%(model)s-list' %%}" method="POST" id="add-form">
                 <div id="form-fields">
@@ -146,55 +156,17 @@ TEMPLATE_DETAILS_CONTENT = """
 {%% block content %%}
     <div class="item">
         <h1>%(model)s - {{ %(model)s }} </h1><br />
-        <table style="border: solid 1px gray; width: 300px; text-align: center;" id="item-list">
-            <tr style="background-color: #DDD">
-                <th style="padding: 10px;">ID</th>
-                <th>Name</th>
-                <th>Action</th>
-            </tr>
-            <tr>
-                <td style="padding: 10px;">{{ %(model)s.id }}</td>
-                <td>{{ %(model)s }}</td>
-                <td><input type="button" href="{%% url '%(app)s:%(model)s-delete' %(model)s.id %%}" id="delete-item" value="delete" /></td>
-            </tr>
-        </table>
-        <br />
-        <br />
-        <br />
-        <input type="button" onclick="$('#add-form-div').toggle();" value="Edit %(model)s"><br /><br />
-        <div id="add-form-div" style="display: none;">
+
+        <div id="add-form-div">
             <form action="{%% url '%(app)s:%(model)s-details' %(model)s.id %%}" method="POST" id="add-form">
                     <div id="form-fields">
                         {%% csrf_token %%}
                         {{ form }}
                     </div>
-                    <input type="submit" value="Submit" />
+                    <input type="submit" value="Submit" >
             </form>
         </div>
     </div>
-
-    <script type="text/javascript">
-        (new FormHelper('add-form')).bind_for_ajax(
-            function(data) {
-                $('#form-fields').html('');
-                $('#form-fields').append('<input type="hidden" value="' + data.token + '" name="csrfmiddlewaretoken">');
-                $('#form-fields').append(data.form).hide().fadeIn();
-                $('#add-form input[type=submit]').removeAttr('disabled');
-            },
-            function(data) {
-                $('#form-fields').html('');
-                $('#form-fields').append('<input type="hidden" value="' + data.token + '" name="csrfmiddlewaretoken">');
-                $('#form-fields').append(data.form).hide().fadeIn();
-                $('#add-form input[type=submit]').removeAttr('disabled');
-            }
-        );
-        $('#delete-item').click(function() {
-            $.get($(this).attr('href'), function(data) {
-                $('div.item').before('<h1>Item removed</h1><br /><br />');
-                $('div.item').remove();
-            });
-        });
-    </script>
     <a href="{%% url '%(app)s:%(model)s-list' %%}">back to list</a>
 {%% endblock %%}
 """
@@ -209,6 +181,7 @@ app_name = '%(app)s'
 
 urlpatterns = [
     path('', views.%(model)s_list, name='%(model)s-list'),
+    path('new', views.%(model)s_new, name='%(model)s-new'),
     path('<int:id>', views.%(model)s_details, name='%(model)s-details'),
     path('<int:id>/delete', views.%(model)s_delete, name='%(model)s-delete'),
 ]
@@ -216,6 +189,7 @@ urlpatterns = [
 
 URL_EXISTS_CONTENT = """
     path('', views.%(model)s_list, name='%(model)s-list'),
+    path('new', views.%(model)s_new, name='%(model)s-new'),
     path('<int:id>', views.%(model)s_details, name='%(model)s-details'),
     path('<int:id>/delete', views.%(model)s_delete, name='%(model)s-delete'),
 """
@@ -319,6 +293,7 @@ class Scaffold(object):
             need_import_users = True
             need_import_token = True
             need_import_JsonResponse = True
+            need_import_form = True
 
             for line in import_file.readlines():
                 if 'from django.shortcuts import render, redirect, get_object_or_404' in line:
@@ -333,8 +308,11 @@ class Scaffold(object):
                 if 'from django.middleware.csrf import get_token' in line:
                     need_import_token = False
 
-                if 'from django.http import JsonResponse' in line:
+                if 'from django.http import JsonResponse, HttpResponseRedirect' in line:
                     need_import_JsonResponse = False
+
+                if ('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app }) in line:
+                    need_import_form = False
 
             if need_import_shortcut:
                 import_list.append(
@@ -347,6 +325,8 @@ class Scaffold(object):
                 import_list.append('from django.middleware.csrf import get_token')
             if need_import_JsonResponse:
                 import_list.append('from django.http import JsonResponse')
+            if need_import_form:
+                import_list.append('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app })
 
         return import_list
 
@@ -492,6 +472,7 @@ class Scaffold(object):
         lower_model = self.model.lower()
 
         # Check if view already exists
+        # TODO: DRY
         if not self.view_exists(view_path, "{0}_list".format(lower_model)):
             view_list.append(LIST_VIEW % {
                 'lower_model': lower_model,
@@ -501,6 +482,16 @@ class Scaffold(object):
             self._info("added \t{0}\t{1}_view".format(view_path, lower_model), 1)
         else:
             self._info("exists\t{0}\t{1}_view".format(view_path, lower_model), 1)
+
+        if not self.view_exists(view_path, "{0}_new".format(lower_model)):
+            view_list.append(NEW_VIEW % {
+                'lower_model': lower_model,
+                'model': self.model,
+                'app': self.app,
+            })
+            self._info("added \t{0}\t{1}_new".format(view_path, lower_model), 1)
+        else:
+            self._info("exists\t{0}\t{1}_new".format(view_path, lower_model), 1)
 
         if not self.view_exists(view_path, "{0}_details".format(lower_model)):
             view_list.append(DETAILS_VIEW % {
