@@ -25,7 +25,7 @@ setup(
     description='Common things every Django app needs! Based on django-common-helpers package',
     packages=find_packages(),
     long_description=long_description,
-    keywords='django',
+    keywords=['django', 'scaffold'],
     zip_safe=False,
     install_requires=[
         'Django>=3.1.4'

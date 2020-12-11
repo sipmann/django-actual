@@ -5,11 +5,14 @@ django-actual-helpers
 .. image:: https://img.shields.io/pypi/v/django-actual-helper.svg
    :target: https://pypi.org/project/django-actual-helper/
 
-.. image:: https://readthedocs.org/projects/django-actual-helper/badge/?version=latest
-   :target: https://pip.pypa.io/en/latest
+.. image:: https://readthedocs.org/projects/django-actual/badge/?version=latest
+    :target: https://django-actual.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 Overview
 ---------
+
+This project is a follow up of the old project `django-common <https://github.com/Tivix/django-common>`_. The project served as a base to this one but it doesn't mean that we'll keep things like it was before.
 
 Django-actual consists of the following things:
 

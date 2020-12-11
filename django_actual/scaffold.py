@@ -226,7 +226,6 @@ admin.site.register(%(model)s)
 """
 
 FORM_CONTENT = """
-
 from %(app)s.models import %(model)s
 
 class %(model)sForm(forms.ModelForm):
@@ -236,7 +235,6 @@ class %(model)sForm(forms.ModelForm):
 """
 
 TESTS_CONTENT = """
-
 from %(app)s.models import %(model)s
 
 
@@ -249,27 +247,27 @@ class %(model)sTest(TestCase):
         self.user.delete()
 
     def test_list(self):
-        response = self.client.get(reverse('%(lower_model)s-list'))
+        response = self.client.get(reverse('%(app)s:%(lower_model)s-list'))
         self.failUnlessEqual(response.status_code, 200)
 
     def test_crud(self):
         # Create new instance
-        response = self.client.post(reverse('%(lower_model)s-list'), {})
+        response = self.client.post(reverse('%(app)s:%(lower_model)s-list'), {})
         self.assertContains(response, '"success": true')
 
         # Read instance
         items = %(model)s.objects.all()
         self.failUnlessEqual(items.count(), 1)
         item = items[0]
-        response = self.client.get(reverse('%(lower_model)s-details', kwargs={'id': item.id}))
+        response = self.client.get(reverse('%(app)s:%(lower_model)s-details', kwargs={'id': item.id}))
         self.failUnlessEqual(response.status_code, 200)
 
         # Update instance
-        response = self.client.post(reverse('%(lower_model)s-details', kwargs={'id': item.id}), {})
+        response = self.client.post(reverse('%(app)s:%(lower_model)s-details', kwargs={'id': item.id}), {})
         self.assertContains(response, '"success": true')
 
         # Delete instance
-        response = self.client.post(reverse('%(lower_model)s-delete', kwargs={'id': item.id}), {})
+        response = self.client.post(reverse('%(app)s:%(lower_model)s-delete', kwargs={'id': item.id}), {})
         self.assertContains(response, '"success": true')
         items = %(model)s.objects.all()
         self.failUnlessEqual(items.count(), 0)
@@ -463,7 +461,7 @@ class Scaffold(object):
 
             if self.SCAFFOLD_APPS_DIR != './':
                 shutil.move(self.app, self.SCAFFOLD_APPS_DIR)
-            #system('mv {0} {1}{2}'.format(self.app, self.SCAFFOLD_APPS_DIR, self.app))
+
             self._info("create\t{0}{1}".format(self.SCAFFOLD_APPS_DIR, self.app), 1)
         else:
             self._info("exists\t{0}{1}".format(self.SCAFFOLD_APPS_DIR, self.app), 1)
@@ -475,10 +473,10 @@ class Scaffold(object):
         view_path = '{0}{1}/views.py'.format(self.SCAFFOLD_APPS_DIR, self.app)
 
         # Check if urls.py exists
-        if path.exists('{0}{1}/views.py'.format(self.SCAFFOLD_APPS_DIR, self.app)):
+        if path.exists(view_path):
             self._info('exists\t{0}{1}/views.py'.format(self.SCAFFOLD_APPS_DIR, self.app), 1)
         else:
-            with open("{0}{1}/views.py".format(self.SCAFFOLD_APPS_DIR, self.app), 'w'):
+            with open(view_path, 'w'):
                 self._info('create\t{0}{1}/views.py'.format(self.SCAFFOLD_APPS_DIR, self.app), 1)
 
         import_list = list()
@@ -614,7 +612,7 @@ class Scaffold(object):
                 fp.write(TEMPLATE_DETAILS_CONTENT % {
                     'app': self.app,
                     'model': self.model.lower(),
-                    'title': self.model.lower(),
+                    'title': self.model.title(),
                 })
             self._info('create\t{0}{1}/templates/{2}/details.html'.format(
                 self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
@@ -650,7 +648,7 @@ class Scaffold(object):
             self._info('create\t{0}{1}/urls.py'.format(self.SCAFFOLD_APPS_DIR, self.app), 1)
 
     def create_admin(self):
-        self._info("    Admin  ")
+        self._info("   Admin  ")
         self._info("===========")
 
         # Check if admin.py exists
@@ -676,7 +674,7 @@ class Scaffold(object):
                                                             self.model.lower()), 1)
 
     def create_forms(self):
-        self._info("    Forms  ")
+        self._info("   Forms  ")
         self._info("===========")
 
         # Check if forms.py exists
