@@ -8,29 +8,18 @@ import shutil
 
 LIST_VIEW = """
 def %(lower_model)s_list(request, template='%(lower_model)s/list.html'):
-    d = {}
-    d['form'] = %(model)sForm()
-    if request.method == 'POST':
-        form = %(model)sForm(request.POST)
-        if form.is_valid():
-            item = form.save()
-            return JsonResponse(data={'id': item.id, 'name': str(item), 'form': %(model)sForm().as_p(), 'token': get_token(request)})
-        else:
-            d['form'] = form
-            return JsonResponse(data={'form': d['form'].as_p(), 'token': get_token(request)}, success=False)
-    d['%(lower_model)s_list'] = %(model)s.objects.all()
-    return render(request, template, d)
+    return render(request, template, {'%(lower_model)s_list' : %(model)s.objects.all()})
 """
 
 NEW_VIEW = """
-def %(lower_model)s_new(request, template='%(lower_model)s/details.html'):
+def %(lower_model)s_new(request, template='%(lower_model)s/new.html'):
     form = %(model)sForm()
 
     if request.method == 'POST':
         form = %(model)sForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('%(app)s:%(model)s-list'))
+            return HttpResponseRedirect(reverse('%(app)s:%(lower_model)s-list'))
 
     return render(request, template, {'form': form})
 """
@@ -44,18 +33,18 @@ def %(lower_model)s_details(request, id, template='%(lower_model)s/details.html'
         form = %(model)sForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('%(app)s:%(model)s-list'))
-    
-    #d['%(lower_model)s'] = %(model)s.objects.get(pk=id)
-    return render(request, template, {'form': form})
+            return HttpResponseRedirect(reverse('%(app)s:%(lower_model)s-list'))
+
+    return render(request, template, {'form': form, '%(lower_model)s': item})
 """
 
 DELETE_VIEW = """
 def %(lower_model)s_delete(request, id):
     item = %(model)s.objects.get(pk=id)
     item.delete()
-    return JsonResponse()
+    return HttpResponseRedirect(reverse('%(app)s:%(lower_model)s-list'))
 """
+
 # MODELS CONSTS
 
 MODEL_TEMPLATE = """
@@ -111,40 +100,42 @@ TEMPLATE_LIST_CONTENT = """
         <tr>
             <td style="padding: 10px;">{{ item.id }}</td>
             <td>{{ item }}</td>
-            <td><a href="{%% url '%(app)s:%(model)s-details' item.id %%}">show</a></td>
+            <td><a href="{%% url '%(app)s:%(model)s-details' item.id %%}">Edit</a> <a href="{%% url '%(app)s:%(model)s-delete' item.id %%}" onclick="ConfirmDelete(e)">Delete</a></td>
         </tr>
     {%% endfor %%}
     </table>
     <br>
     <a href="{%% url '%(app)s:%(model)s-new' %%}" >Add new %(model)s </a>
-    <br>
-    <div id="add-form-div" style="display: none;">
-        <form action="{%% url '%(app)s:%(model)s-list' %%}" method="POST" id="add-form">
-                <div id="form-fields">
-                    {%% csrf_token %%}
-                    {{ form }}
-                </div>
-                <input type="submit" value="Submit">
-        </form>
-    </div>
-
-    <script type="text/javascript">
-        (new FormHelper('add-form')).bind_for_ajax(
-            function(data) {
-                $('#item-list').append('<td style="padding: 10px;">' + data.id + '</td><td>' + data.name + '</td><td><a href="{%% url '%(app)s:%(model)s-list' %%}' + data.id + '/">show</a></td>').hide().fadeIn();
-                $('#form-fields').html('');
-                $('#form-fields').append('<input type="hidden" value="' + data.token + '" name="csrfmiddlewaretoken">');
-                $('#form-fields').append(data.form);
-                $('#add-form-div').toggle();
-            },
-            function(data) {
-                $('#form-fields').html('');
-                $('#form-fields').append('<input type="hidden" value="' + data.token + '" name="csrfmiddlewaretoken">');
-                $('#form-fields').append(data.form).hide().fadeIn();
-                $('#add-form input[type=submit]').removeAttr('disabled');
-            }
-        );
+    
+    <script>
+        function ConfirmDelete(e) {
+            if (!confirm('Delete this %(model)s?')
+                e.preventDefault();
+        }
     </script>
+{%% endblock %%}
+"""
+
+TEMPLATE_NEW_CONTENT = """
+{%% extends "base.html" %%}
+
+{%% block page-title %%}%(title)s - {{ %(model)s }} {%% endblock %%}
+
+{%% block content %%}
+    <div class="item">
+        <h1>%(model)s - {{ %(model)s }} </h1><br>
+
+        <div id="add-form-div">
+            <form action="{%% url '%(app)s:%(model)s-new' %%}" method="POST" id="add-form">
+                    <div id="form-fields">
+                        {%% csrf_token %%}
+                        {{ form }}
+                    </div>
+                    <input type="submit" value="Submit" >
+            </form>
+        </div>
+    </div>
+    <a href="{%% url '%(app)s:%(model)s-list' %%}">back to list</a>
 {%% endblock %%}
 """
 
@@ -222,29 +213,30 @@ class %(model)sTest(TestCase):
 
     def test_list(self):
         response = self.client.get(reverse('%(app)s:%(lower_model)s-list'))
-        self.failUnlessEqual(response.status_code, 200)
+        self.assertEquals(response.status_code, 200)
 
     def test_crud(self):
         # Create new instance
-        response = self.client.post(reverse('%(app)s:%(lower_model)s-list'), {})
-        self.assertContains(response, '"success": true')
+        response = self.client.post(reverse('%(app)s:%(lower_model)s-new'), {})
+        self.assertEquals(response.status_code, 302)
 
         # Read instance
         items = %(model)s.objects.all()
         self.failUnlessEqual(items.count(), 1)
         item = items[0]
         response = self.client.get(reverse('%(app)s:%(lower_model)s-details', kwargs={'id': item.id}))
-        self.failUnlessEqual(response.status_code, 200)
+        self.assertEquals(response.status_code, 200)
 
         # Update instance
         response = self.client.post(reverse('%(app)s:%(lower_model)s-details', kwargs={'id': item.id}), {})
-        self.assertContains(response, '"success": true')
+        self.assertEquals(response.status_code, 302)
 
         # Delete instance
         response = self.client.post(reverse('%(app)s:%(lower_model)s-delete', kwargs={'id': item.id}), {})
-        self.assertContains(response, '"success": true')
+        self.assertEquals(response.status_code, 302)
+
         items = %(model)s.objects.all()
-        self.failUnlessEqual(items.count(), 0)
+        self.assertEquals(items.count(), 0)
 
 """
 
@@ -284,7 +276,6 @@ class Scaffold(object):
         return False
 
     def add_global_view_imports(self, path):
-        # from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
         import_list = list()
 
         with open(path, 'r') as import_file:
@@ -321,10 +312,10 @@ class Scaffold(object):
                 import_list.append('from django.urls import reverse')
             if need_import_users:
                 import_list.append('from django.contrib.auth.models import User, Group')
-            if need_import_token:
-                import_list.append('from django.middleware.csrf import get_token')
+            #if need_import_token:
+            #    import_list.append('from django.middleware.csrf import get_token')
             if need_import_JsonResponse:
-                import_list.append('from django.http import JsonResponse')
+                import_list.append('from django.http import JsonResponse, HttpResponseRedirect')
             if need_import_form:
                 import_list.append('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app })
 
@@ -507,6 +498,7 @@ class Scaffold(object):
             view_list.append(DELETE_VIEW % {
                 'lower_model': lower_model,
                 'model': self.model,
+                'app': self.app,
             })
             self._info("added \t{0}\t{1}_delete".format(view_path, lower_model), 1)
         else:
@@ -591,22 +583,39 @@ class Scaffold(object):
             self._info('create\t{0}{1}/templates/{2}/list.html'.format(
                 self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
 
-        # Check if details.html exists
+            # Check if details.html exists
 
-        if path.exists('{0}{1}/templates/{2}/details.html'.format(
-                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower())):
-            self._info('exists\t{0}{1}/templates/{2}/details.html'.format(
-                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
-        else:
-            with open("{0}{1}/templates/{2}/details.html".format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 'w') as fp:
-                fp.write(TEMPLATE_DETAILS_CONTENT % {
-                    'app': self.app,
-                    'model': self.model.lower(),
-                    'title': self.model.title(),
-                })
-            self._info('create\t{0}{1}/templates/{2}/details.html'.format(
-                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
+            if path.exists('{0}{1}/templates/{2}/details.html'.format(
+                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower())):
+                self._info('exists\t{0}{1}/templates/{2}/details.html'.format(
+                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
+            else:
+                with open("{0}{1}/templates/{2}/details.html".format(
+                        self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 'w') as fp:
+                    fp.write(TEMPLATE_DETAILS_CONTENT % {
+                        'app': self.app,
+                        'model': self.model.lower(),
+                        'title': self.model.title(),
+                    })
+                self._info('create\t{0}{1}/templates/{2}/details.html'.format(
+                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
+
+            # Check if new.html exists
+
+            if path.exists('{0}{1}/templates/{2}/new.html'.format(
+                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower())):
+                self._info('exists\t{0}{1}/templates/{2}/new.html'.format(
+                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
+            else:
+                with open("{0}{1}/templates/{2}/new.html".format(
+                        self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 'w') as fp:
+                    fp.write(TEMPLATE_NEW_CONTENT % {
+                        'app': self.app,
+                        'model': self.model.lower(),
+                        'title': self.model.title(),
+                    })
+                self._info('create\t{0}{1}/templates/{2}/new.html'.format(
+                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
 
     def create_urls(self):
         self._info("    URLs   ")
