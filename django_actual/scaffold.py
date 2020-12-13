@@ -567,55 +567,29 @@ class Scaffold(object):
                 self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
 
         # Check if list.html exists
+        self.create_view_file('list', TEMPLATE_LIST_CONTENT)
 
-        if path.exists('{0}{1}/templates/{2}/list.html'.format(self.SCAFFOLD_APPS_DIR, self.app,
-                                                               self.model.lower())):
-            self._info('exists\t{0}{1}/templates/{2}/list.html'.format(
-                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
+        # Check if details.html exists
+        self.create_view_file('details', TEMPLATE_DETAILS_CONTENT)
+
+        # Check if new.html exists
+        self.create_view_file('new', TEMPLATE_NEW_CONTENT)
+
+    def create_view_file(self, name, template):
+        if path.exists('{0}{1}/templates/{2}/{3}.html'.format(self.SCAFFOLD_APPS_DIR, self.app,
+                                                               self.model.lower(), name)):
+            self._info('exists\t{0}{1}/templates/{2}/{3}.html'.format(
+                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower(), name), 1)
         else:
-            with open("{0}{1}/templates/{2}/list.html".format(self.SCAFFOLD_APPS_DIR, self.app,
-                                                              self.model.lower()), 'w') as fp:
-                fp.write(TEMPLATE_LIST_CONTENT % {
+            with open("{0}{1}/templates/{2}/{3}.html".format(self.SCAFFOLD_APPS_DIR, self.app,
+                                                              self.model.lower(), name), 'w') as fp:
+                fp.write(template % {
                     'app': self.app,
                     'model': self.model.lower(),
                     'title': self.model.lower(),
                 })
-            self._info('create\t{0}{1}/templates/{2}/list.html'.format(
-                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
-
-            # Check if details.html exists
-
-            if path.exists('{0}{1}/templates/{2}/details.html'.format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower())):
-                self._info('exists\t{0}{1}/templates/{2}/details.html'.format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
-            else:
-                with open("{0}{1}/templates/{2}/details.html".format(
-                        self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 'w') as fp:
-                    fp.write(TEMPLATE_DETAILS_CONTENT % {
-                        'app': self.app,
-                        'model': self.model.lower(),
-                        'title': self.model.title(),
-                    })
-                self._info('create\t{0}{1}/templates/{2}/details.html'.format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
-
-            # Check if new.html exists
-
-            if path.exists('{0}{1}/templates/{2}/new.html'.format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower())):
-                self._info('exists\t{0}{1}/templates/{2}/new.html'.format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
-            else:
-                with open("{0}{1}/templates/{2}/new.html".format(
-                        self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 'w') as fp:
-                    fp.write(TEMPLATE_NEW_CONTENT % {
-                        'app': self.app,
-                        'model': self.model.lower(),
-                        'title': self.model.title(),
-                    })
-                self._info('create\t{0}{1}/templates/{2}/new.html'.format(
-                    self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
+            self._info('create\t{0}{1}/templates/{2}/{3}.html'.format(
+                self.SCAFFOLD_APPS_DIR, self.app, self.model.lower(), name), 1)
 
     def create_urls(self):
         self._info("    URLs   ")
