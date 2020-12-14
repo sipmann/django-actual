@@ -83,82 +83,90 @@ FOREIGNFIELD_TEMPLATE = """
     %(name)s = models.ForeignKey(%(foreign)s, null=%(null)s, blank=%(null)s)
 """
 
-TEMPLATE_LIST_CONTENT = """
-{%% extends "base.html" %%}
+TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
 
 {%% block page-title %%}%(title)s{%% endblock %%}
 
 {%% block content %%}
-    <h1>%(model)s list</h1><br>
-    <table style="border: solid 1px gray; width: 300px; text-align: center;" id="item-list">
-        <tr style="background-color: #DDD">
-            <th style="padding: 10px;">ID</th>
-            <th>Name</th>
-            <th>Action</th>
-        </tr>
-    {%% for item in %(model)s_list %%}
-        <tr>
-            <td style="padding: 10px;">{{ item.id }}</td>
-            <td>{{ item }}</td>
-            <td><a href="{%% url '%(app)s:%(model)s-details' item.id %%}">Edit</a> <a href="{%% url '%(app)s:%(model)s-delete' item.id %%}" onclick="ConfirmDelete(e)">Delete</a></td>
-        </tr>
-    {%% endfor %%}
-    </table>
-    <br>
-    <a href="{%% url '%(app)s:%(model)s-new' %%}" >Add new %(model)s </a>
-    
-    <script>
-        function ConfirmDelete(e) {
-            if (!confirm('Delete this %(model)s?')
-                e.preventDefault();
-        }
-    </script>
+<div class="card">
+    <div class="card-title d-flex justify-content-between mb-4">
+        <span>%(model)s list</span>
+        <a class="btn btn-primary" href="{%% url '%(app)s:%(model)s-new' %%}">Add new %(model)s</a>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+        {%% for item in %(model)s_list %%}
+            <thead>
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item }}</td>
+                    <td><a href="{%% url '%(app)s:%(model)s-details' item.id %%}">Edit</a> <a href="{%% url '%(app)s:%(model)s-delete' item.id %%}" onclick="ConfirmDelete(e)">Delete</a></td>
+                </tr>
+            </thead>
+        {%% endfor %%}
+        </table>
+
+        <script>
+            function ConfirmDelete(e) {
+                if (!confirm('Delete this %(model)s?')
+                    e.preventDefault();
+            }
+        </script>
+    </div>
+</div>
 {%% endblock %%}
 """
 
-TEMPLATE_NEW_CONTENT = """
-{%% extends "base.html" %%}
+TEMPLATE_NEW_CONTENT = """{%% extends "base.html" %%}
 
 {%% block page-title %%}%(title)s - {{ %(model)s }} {%% endblock %%}
 
 {%% block content %%}
-    <div class="item">
-        <h1>%(model)s - {{ %(model)s }} </h1><br>
-
-        <div id="add-form-div">
-            <form action="{%% url '%(app)s:%(model)s-new' %%}" method="POST" id="add-form">
-                    <div id="form-fields">
-                        {%% csrf_token %%}
-                        {{ form }}
-                    </div>
-                    <input type="submit" value="Submit" >
-            </form>
-        </div>
+<div class="card">
+    <div class="card-title">
+        <span>%(model)s - {{ %(model)s }} </span>
     </div>
-    <a href="{%% url '%(app)s:%(model)s-list' %%}">back to list</a>
+    <div class="card-body">
+        <form action="{%% url '%(app)s:%(model)s-new' %%}" method="POST">
+            <div>
+                {%% csrf_token %%}
+                {{ form }}
+            </div>
+            <input type="submit" value="Submit" class="btn btn-success">
+            <a class="btn btn-danger" href="{%% url '%(app)s:%(model)s-list' %%}">back to list</a>
+        </form>
+    </div>
+</div>
 {%% endblock %%}
 """
 
-TEMPLATE_DETAILS_CONTENT = """
-{%% extends "base.html" %%}
+TEMPLATE_DETAILS_CONTENT = """{%% extends "base.html" %%}
 
 {%% block page-title %%}%(title)s - {{ %(model)s }} {%% endblock %%}
 
 {%% block content %%}
-    <div class="item">
-        <h1>%(model)s - {{ %(model)s }} </h1><br />
-
-        <div id="add-form-div">
-            <form action="{%% url '%(app)s:%(model)s-details' %(model)s.id %%}" method="POST" id="add-form">
-                    <div id="form-fields">
-                        {%% csrf_token %%}
-                        {{ form }}
-                    </div>
-                    <input type="submit" value="Submit" >
-            </form>
-        </div>
+<div class="card">
+    <div class="card-title">
+        <span>%(model)s - {{ %(model)s }} </span>
     </div>
-    <a href="{%% url '%(app)s:%(model)s-list' %%}">back to list</a>
+    <div class="card-body">
+        <form action="{%% url '%(app)s:%(model)s-details' %(model)s.id %%}" method="POST">
+            <div>
+                {%% csrf_token %%}
+                {{ form }}
+            </div>
+            <input type="submit" value="Submit" class="btn btn-success">
+            <a class="btn btn-danger" href="{%% url '%(app)s:%(model)s-list' %%}">back to list</a>
+        </form>
+    </div>
+</div>
 {%% endblock %%}
 """
 

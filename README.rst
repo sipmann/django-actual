@@ -12,7 +12,7 @@ django-actual-helpers
 Overview
 ---------
 
-This project is a follow up of the old project `django-common <https://github.com/Tivix/django-common>`_. The project served as a base to this one but it doesn't mean that we'll keep things like it was before.
+This project is a follow up of the old project django-common from Tivix. The project served as a base to this one but it doesn't mean that we'll keep things like it was before.
 
 Django-actual consists of the following things:
 
@@ -70,9 +70,7 @@ Installation
 		# ...
 		"WWWRedirectMiddleware",
 	]
-
-- Scaffolds / ajax_form.js (ajax forms) etc. require jQuery
-
+    
 
 Scaffolding feature
 -------------------
@@ -226,109 +224,6 @@ Changelog
 =========
 
 0.9.3
------
+------
     - Changed the minimum Django version to 3.X. Version 2 might work (but not tested)
     - Removed unused things
-
-0.9.2
------
-    - Change for Django 2.X
-
-0.9.1
------
-    - Change for Django 1.10 - render() must be called with a dict, not a Context
-
-0.9.0
------
-    - Django 1.10 support
-    - README.txt invalid characters fix
-    - Add support for custom user model in EmailBackend
-    - Fixes for DB fields and management commands
-
-0.8.0
------
-    - compatability code moved to compat.py
-    - ``generate_secret_key`` management command.
-    - Fix relating to https://code.djangoproject.com/ticket/17627, package name change.
-    - Pass form fields with HiddenInput widget through render_form_field
-    - string.format usage / other refactoring / more support for Python 3
-
-
-0.7.0
------
-    - PEP8 codebase cleanup.
-    - Improved python3 support.
-    - Django 1.8 support.
-
-0.6.4
------
-    - Added python3 support.
-
-0.6.3
------
-    - Changed mimetype to content_type in class JsonReponse to reflect Django 1.7 deprecation.
-
-0.6.2
------
-    - Django 1.7 compatability using simplejson as fallback
-
-
-0.6.1
------
-    - Added support for attaching content to emails manually (without providing path to file).
-
-    - Added LoginRequiredMixin
-
-
-0.6
----
-    - Added support for Django 1.5
-
-    - Added fixes in nested inlines
-
-    - Added support for a multi-select checkbox field template and radio button in render_form_field
-
-    - Added Test Email Backend for overwrite TO, CC and BCC fields in all outgoing emails
-
-    - Added Custom File Email Backend to save emails as file with custom extension
-
-    - Rewrote fragments to be Bootstrap-compatible
-
-
-0.5.1
------
-
-    - root_path deprecated in Django 1.4+
-
-
-0.5
----
-
-    - Added self.get_inline_instances() usages instead of self.inline_instances
-
-    - Changed minimum requirement to Django 1.4+ because of the above.
-
-
-0.4
----
-
-    - Added nested inline templates, js and full ajax support. Now we can add/remove nested fields dynamically.
-
-    - JsonpResponse object for padded JSON
-
-    - User time tracking feature - how long the user has been on site, associated middleware etc.
-
-    - @anonymous_required decorator: for views that should not be accessed by a logged-in user.
-
-    - Added EncryptedTextField and EncryptedCharField
-
-    - Misc. bug fixes
-
-
-
-Todos
-------
-[ ] Better Tests
-[ ] Better View Generator
-[ ] Styled templates
-[ ] CamelCase on templates titles
