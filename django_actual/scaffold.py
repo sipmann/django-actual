@@ -471,7 +471,6 @@ class Scaffold(object):
         lower_model = self.model.lower()
 
         # Check if view already exists
-        # TODO: DRY
         if not self.view_exists(view_path, "{0}_list".format(lower_model)):
             view_list.append(LIST_VIEW % {
                 'lower_model': lower_model,
@@ -746,3 +745,8 @@ class Scaffold(object):
             self.create_urls()
             self.create_templates()
             self.create_tests()
+
+        self._info(' All Done ')
+        self._info('===========')
+        self._info("Add '{0}.apps.{0}Config' to the settings file".format(self.app))
+        self._info("Add path('{0}', include('{0}.urls'))) to the router file".format(self.app))

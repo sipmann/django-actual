@@ -1,18 +1,19 @@
-from __future__ import print_function, unicode_literals, with_statement, division
-
-from django.utils import unittest
+try:
+    from django.utils import unittest
+except ImportError:
+    import unittest
 from django.core.management import call_command
 
 try:
-    from cStringIO import StringIO
-except ImportError:
     from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import sys
 import random
 
 
-class SimpleTestCase(unittest.TestCase):
+class TestSecretKeyGenerator(unittest.TestCase):
     def setUp(self):
         pass
 

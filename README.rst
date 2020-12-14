@@ -126,7 +126,7 @@ Scaffold creates models, views (CRUD), forms, templates, admin, urls and basic t
 
     {% extends "base.html" %}
     {% block page-title %} {% endblock %}
-    {% block conent %} {% endblock %}
+    {% block content %} {% endblock %}
 
 So be sure you have your base.html set up properly.
 
@@ -164,7 +164,8 @@ Now you must add ``forum`` app to ``INSTALLED_APPS`` and include app in ``urls.p
 
 Now syncdb new app and you are ready to go::
 
-    python manage.py syncdb
+    python manage.py makemigrations
+    python manage.py migrate
 
 Run your server::
 
