@@ -2,8 +2,8 @@
 django-actual-helpers
 =====================
 
-.. image:: https://img.shields.io/pypi/v/django-actual-helper.svg
-   :target: https://pypi.org/project/django-actual-helper/
+.. image:: https://img.shields.io/pypi/v/django-actual-helpers.svg
+   :target: https://pypi.org/project/django-actual-helpers/
 
 .. image:: https://readthedocs.org/projects/django-actual/badge/?version=latest
     :target: https://django-actual.readthedocs.io/en/latest/?badge=latest
@@ -70,7 +70,6 @@ Installation
 		# ...
 		"WWWRedirectMiddleware",
 	]
-    
 
 Scaffolding feature
 -------------------
@@ -201,7 +200,8 @@ Sample output:
 
     $ python manage.py generate_secret_key
 
-    SECRET_KEY: 7,=_3t?n@'wV=p`ITIA6"CUgJReZf?s:`f~Jtl#2i=i^z%rCp-
+    SECRET_KEY: 7,=_3t?n@'wV=p`ITIA6"CUgJReZf?s:\`f~Jtl#2i=i^z%rCp-
+
 
 Optional arguments
 
