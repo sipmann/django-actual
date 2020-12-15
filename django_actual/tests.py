@@ -1,8 +1,6 @@
-try:
-    from django.utils import unittest
-except ImportError:
-    import unittest
 from django.core.management import call_command
+from django.test import TestCase
+
 
 try:
     from StringIO import StringIO
@@ -13,9 +11,9 @@ import sys
 import random
 
 
-class TestSecretKeyGenerator(unittest.TestCase):
+class TestSecretKeyGenerator(TestCase):
     def setUp(self):
-        pass
+        super().setUp()
 
     def test_generate_secret_key(self):
         """ Test generation of a secret key """
@@ -24,7 +22,7 @@ class TestSecretKeyGenerator(unittest.TestCase):
 
         for i in range(10):
             random_number = random.randrange(10, 100)
-            call_command('generate_secret_key', length=random_number)
+            call_command('generate_secret_key', length=random_number, stdout=out)
             secret_key = self._get_secret_key(out.getvalue())
 
             out.truncate(0)
@@ -37,3 +35,11 @@ class TestSecretKeyGenerator(unittest.TestCase):
         for index, key in enumerate(result):
             if key == ':':
                 return str(result[index + 1:]).strip()
+
+
+class TestScaffoldGenerator(TestCase):
+    def setUp(self):
+        super().setUp()
+
+    def test_generate_forum_scaffold(self):
+        pass
