@@ -59,28 +59,22 @@ class %s(models.Model):
 
 IMPORT_MODEL_TEMPLATE = """from %(app)s.models import %(model)s"""
 
-CHARFIELD_TEMPLATE = """
-    %(name)s = models.CharField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
+CHARFIELD_TEMPLATE = """%(name)s = models.CharField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
 """
 
-TEXTFIELD_TEMPLATE = """
-    %(name)s = models.TextField(null=%(null)s, blank=%(null)s)
+TEXTFIELD_TEMPLATE = """%(name)s = models.TextField(null=%(null)s, blank=%(null)s)
 """
 
-INTEGERFIELD_TEMPLATE = """
-    %(name)s = models.IntegerField(null=%(null)s, default=%(default)s)
+INTEGERFIELD_TEMPLATE = """%(name)s = models.IntegerField(null=%(null)s, default=%(default)s)
 """
 
-DECIMALFIELD_TEMPLATE = """
-    %(name)s = models.DecimalField(max_digits=%(digits)s, decimal_places=%(places)s, null=%(null)s, default=%(default)s)
+DECIMALFIELD_TEMPLATE = """%(name)s = models.DecimalField(max_digits=%(digits)s, decimal_places=%(places)s, null=%(null)s, default=%(default)s)
 """
 
-DATETIMEFIELD_TEMPLATE = """
-    %(name)s = models.DateTimeField(null=%(null)s, default=%(default)s)
+DATETIMEFIELD_TEMPLATE = """%(name)s = models.DateTimeField(null=%(null)s, default=%(default)s)
 """
 
-FOREIGNFIELD_TEMPLATE = """
-    %(name)s = models.ForeignKey(%(foreign)s, null=%(null)s, blank=%(null)s)
+FOREIGNFIELD_TEMPLATE = """%(name)s = models.ForeignKey(%(foreign)s, null=%(null)s, blank=%(null)s, on_delete=models.DO_NOTHING)
 """
 
 TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
@@ -89,11 +83,11 @@ TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
 
 {%% block content %%}
 <div class="card">
-    <div class="card-title d-flex justify-content-between mb-4">
-        <span>%(model)s list</span>
-        <a class="btn btn-primary" href="{%% url '%(app)s:%(model)s-new' %%}">Add new %(model)s</a>
-    </div>
     <div class="card-body">
+        <div class="card-title d-flex justify-content-between mb-4">
+            <h2>%(model)s list</h2>
+            <a class="btn btn-primary" href="{%% url '%(app)s:%(model)s-new' %%}">Add new %(model)s</a>
+        </div>
         <table class="table">
             <thead>
                 <tr>
@@ -115,7 +109,7 @@ TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
 
         <script>
             function ConfirmDelete(e) {
-                if (!confirm('Delete this %(model)s?')
+                if (!confirm('Delete this %(model)s?'))
                     e.preventDefault();
             }
         </script>
@@ -130,10 +124,10 @@ TEMPLATE_NEW_CONTENT = """{%% extends "base.html" %%}
 
 {%% block content %%}
 <div class="card">
-    <div class="card-title">
-        <span>%(model)s - {{ %(model)s }} </span>
-    </div>
     <div class="card-body">
+        <div class="card-title">
+            <h2>%(model)s - {{ %(model)s }} </h2>
+        </div>
         <form action="{%% url '%(app)s:%(model)s-new' %%}" method="POST">
             <div>
                 {%% csrf_token %%}
@@ -153,10 +147,10 @@ TEMPLATE_DETAILS_CONTENT = """{%% extends "base.html" %%}
 
 {%% block content %%}
 <div class="card">
-    <div class="card-title">
-        <span>%(model)s - {{ %(model)s }} </span>
-    </div>
     <div class="card-body">
+        <div class="card-title">
+            <h2>%(model)s - {{ %(model)s }} </h2>
+        </div>
         <form action="{%% url '%(app)s:%(model)s-details' %(model)s.id %%}" method="POST">
             <div>
                 {%% csrf_token %%}
@@ -536,10 +530,15 @@ class Scaffold(object):
             self.imports = []
             fields = []
 
+            # TODO: Add charField to __str__
+            charField = ''
             for field in self.fields:
                 new_field = self.get_field(field)
 
                 if new_field:
+                    if 'CharField' in new_field and charField == '':
+                        charField = field.split(':')[0]
+
                     fields.append(new_field)
                     self._info('added\t{0}{1}/models.py\t{2} field'.format(
                         self.SCAFFOLD_APPS_DIR, self.app, field.split(':')[0]), 1)

@@ -5,6 +5,9 @@ django-actual-helpers
 .. image:: https://img.shields.io/pypi/v/django-actual-helpers.svg
    :target: https://pypi.org/project/django-actual-helpers/
 
+.. image:: https://img.shields.io/pypi/dm/django-actual-helpers   
+    :alt: PyPI - Downloads
+
 .. image:: https://readthedocs.org/projects/django-actual/badge/?version=latest
     :target: https://django-actual.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
@@ -28,7 +31,7 @@ Django-actual consists of the following things:
 
 	- A ``render_form_field`` template tag that makes rendering form fields easy and DRY.
 
-	- A couple of dry response classes: ``JsonResponse`` and ``XMLResponse`` in the django_actual.http that can be used in views that give json/xml responses.
+	- A dry response class: ``XMLResponse`` in the django_actual.http that can be used in views that give xml responses.
 
 
 Installation
@@ -76,7 +79,7 @@ Scaffolding feature
 
 1. Installing
 
-To get scaffold just download ``scaffold`` branch of django-common, add it to ``INSTALLED_APPS`` and set up ``SCAFFOLD_APPS_DIR`` in settings.
+To get scaffold install it through pip with ``pip install django-actual-helpers`` and add ``django_actual`` to the INSTALLED_APPS.
 
 Default is set to main app directory. However if you use django_base_project you must set up this to ``SCAFFOLD_APPS_DIR = 'apps/'``.
 
@@ -118,6 +121,13 @@ NOTICE: All foreign key models must already exist in project. User and Group mod
 
     total_cost:decimal:10:2
 
+- char field also have a length parameter on the third position
+
+- all fields have a required as the last argument
+
+    total_cost:deciman:10:2:True
+    name:char:50:True
+
 NOTICE: To all models scaffold automatically adds two fields: update_date and create_date.
 
 4. How it works?
@@ -133,7 +143,7 @@ So be sure you have your base.html set up properly.
 Scaffolding example usage
 -------------------------
 
-Let's create very simple ``forum`` app. We need ``Forum``, ``Topic`` and ``Post`` model.
+Let's create simple ``forum`` app. We need ``Forum``, ``Topic`` and ``Post`` model.
 
 - Forum model
 
@@ -228,3 +238,5 @@ Changelog
 ------
     - Changed the minimum Django version to 3.X. Version 2 might work (but not tested)
     - Removed unused things
+    - Add __str__ to generated models
+    - Bootstrap layout to the templates
