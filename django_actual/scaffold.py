@@ -19,6 +19,7 @@ def %(lower_model)s_new(request, template='%(lower_model)s/new.html'):
         form = %(model)sForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, '%(lower_model)s successfully created.')
             return HttpResponseRedirect(reverse('%(app)s:%(lower_model)s-list'))
 
     return render(request, template, {'form': form})
@@ -33,6 +34,7 @@ def %(lower_model)s_details(request, id, template='%(lower_model)s/details.html'
         form = %(model)sForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
+            messages.success(request, '%(lower_model)s successfully edited.')
             return HttpResponseRedirect(reverse('%(app)s:%(lower_model)s-list'))
 
     return render(request, template, {'form': form, '%(lower_model)s': item})
@@ -42,6 +44,7 @@ DELETE_VIEW = """
 def %(lower_model)s_delete(request, id):
     item = %(model)s.objects.get(pk=id)
     item.delete()
+    messages.success(request, '%(lower_model)s deleted.')
     return HttpResponseRedirect(reverse('%(app)s:%(lower_model)s-list'))
 """
 
@@ -296,6 +299,7 @@ class Scaffold(object):
             need_import_token = True
             need_import_JsonResponse = True
             need_import_form = True
+            need_import_contrib = True
 
             for line in import_file.readlines():
                 if 'from django.shortcuts import render, redirect, get_object_or_404' in line:
@@ -312,6 +316,9 @@ class Scaffold(object):
 
                 if 'from django.http import JsonResponse, HttpResponseRedirect' in line:
                     need_import_JsonResponse = False
+                
+                if 'from django.contrib import messages' in line:
+                    need_import_contrib = False
 
                 if ('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app }) in line:
                     need_import_form = False
@@ -327,6 +334,8 @@ class Scaffold(object):
             #    import_list.append('from django.middleware.csrf import get_token')
             if need_import_JsonResponse:
                 import_list.append('from django.http import JsonResponse, HttpResponseRedirect')
+            if need_import_contrib:
+                import_list.append('from django.contrib import messages')
             if need_import_form:
                 import_list.append('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app })
 
