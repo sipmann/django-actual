@@ -53,6 +53,9 @@ class %s(models.Model):
     update_date = models.DateTimeField(auto_now=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.%s
+
     class Meta:
         ordering = ['-id']
 """
@@ -60,6 +63,9 @@ class %s(models.Model):
 IMPORT_MODEL_TEMPLATE = """from %(app)s.models import %(model)s"""
 
 CHARFIELD_TEMPLATE = """    %(name)s = models.CharField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
+"""
+
+BOOLEANFIELD_TEMPLATE = """    %(name)s = models.BooleanField(default=True, null=%(null)s, blank=%(null)s)
 """
 
 TEXTFIELD_TEMPLATE = """    %(name)s = models.TextField(null=%(null)s, blank=%(null)s)
@@ -438,6 +444,17 @@ class Scaffold(object):
                 null = 'True'
 
             return EMAIL_TEMPLATE % {'name': field_name, 'length': length, 'null': null}
+        elif field_type.lower() == 'bool':
+
+            try:
+                null = field[3]
+                null = 'False'
+            except IndexError:
+                null = 'True'
+
+            return BOOLEANFIELD_TEMPLATE % {'name': field_name, 'null': null}
+        else:
+            self._info("Field %s has unknow type %s" % (field_name, field_type.lower()))
 
     def create_app(self):
         self._info("    App    ")
@@ -558,11 +575,14 @@ class Scaffold(object):
                     fields.append(new_field)
                     self._info('added\t{0}{1}/models.py\t{2} field'.format(
                         self.SCAFFOLD_APPS_DIR, self.app, field.split(':')[0]), 1)
+            
+            if charField == '':
+                charField = 'id'
 
         # Open models.py to append
         with open('{0}{1}/models.py'.format(self.SCAFFOLD_APPS_DIR, self.app), 'a') as fp:
             fp.write(''.join([import_line for import_line in self.imports]))
-            fp.write(MODEL_TEMPLATE % (self.model, ''.join(field for field in fields)))
+            fp.write(MODEL_TEMPLATE % (self.model, ''.join(field for field in fields), charField))
 
     def create_templates(self):
         self._info(" Templates ")

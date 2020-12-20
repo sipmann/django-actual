@@ -105,6 +105,7 @@ Available fields::
     datetime - DateTimeField
     foreign - ForeignKey
     email - EmailField
+    bool - BooleanField
 
 All fields requires name that is provided before ``:`` sign, for example::
 
