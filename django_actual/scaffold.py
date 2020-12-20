@@ -59,22 +59,25 @@ class %s(models.Model):
 
 IMPORT_MODEL_TEMPLATE = """from %(app)s.models import %(model)s"""
 
-CHARFIELD_TEMPLATE = """%(name)s = models.CharField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
+CHARFIELD_TEMPLATE = """    %(name)s = models.CharField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
 """
 
-TEXTFIELD_TEMPLATE = """%(name)s = models.TextField(null=%(null)s, blank=%(null)s)
+TEXTFIELD_TEMPLATE = """    %(name)s = models.TextField(null=%(null)s, blank=%(null)s)
 """
 
-INTEGERFIELD_TEMPLATE = """%(name)s = models.IntegerField(null=%(null)s, default=%(default)s)
+INTEGERFIELD_TEMPLATE = """    %(name)s = models.IntegerField(null=%(null)s, default=%(default)s)
 """
 
-DECIMALFIELD_TEMPLATE = """%(name)s = models.DecimalField(max_digits=%(digits)s, decimal_places=%(places)s, null=%(null)s, default=%(default)s)
+DECIMALFIELD_TEMPLATE = """    %(name)s = models.DecimalField(max_digits=%(digits)s, decimal_places=%(places)s, null=%(null)s, default=%(default)s)
 """
 
-DATETIMEFIELD_TEMPLATE = """%(name)s = models.DateTimeField(null=%(null)s, default=%(default)s)
+DATETIMEFIELD_TEMPLATE = """    %(name)s = models.DateTimeField(null=%(null)s, default=%(default)s)
 """
 
-FOREIGNFIELD_TEMPLATE = """%(name)s = models.ForeignKey(%(foreign)s, null=%(null)s, blank=%(null)s, on_delete=models.DO_NOTHING)
+FOREIGNFIELD_TEMPLATE = """    %(name)s = models.ForeignKey(%(foreign)s, null=%(null)s, blank=%(null)s, on_delete=models.DO_NOTHING)
+"""
+
+EMAIL_TEMPLATE = """    %(name)s = models.EmailField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
 """
 
 TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
@@ -422,6 +425,19 @@ class Scaffold(object):
             self._info('error\t{0}{1}/models.py\t{2} class not found'.format(
                 self.SCAFFOLD_APPS_DIR, self.app, foreign), 1)
             return None
+        elif field_type.lower() == 'email':
+            try:
+                length = field[2]
+            except IndexError:
+                length = 255
+
+            try:
+                null = field[3]
+                null = 'False'
+            except IndexError:
+                null = 'True'
+
+            return EMAIL_TEMPLATE % {'name': field_name, 'length': length, 'null': null}
 
     def create_app(self):
         self._info("    App    ")

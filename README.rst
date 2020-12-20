@@ -104,6 +104,7 @@ Available fields::
     decimal -DecimalField
     datetime - DateTimeField
     foreign - ForeignKey
+    email - EmailField
 
 All fields requires name that is provided before ``:`` sign, for example::
 
