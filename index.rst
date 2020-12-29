@@ -11,15 +11,23 @@ Guide
 ^^^^^
 
 Installation
-^^^^^^^^^^^^
+-------------
+
+First run the pip install command like the following
+
+.. code-block:: bash
 
    pip install django-actual-helpers
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Then add the `django_actual` app to your `INSTALLED_APPS` inside django `settings.py`.
 
+.. toctree::
+   :maxdepth: 3
+   :caption: Topics:
+
+   scaffold
    license
+   help
 
 
 
