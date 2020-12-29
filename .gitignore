@@ -1,0 +1,8 @@
+*.pyc
+*.DS_Store
+dist
+build
+django-actual_helpers.egg-info
+venv/
+.idea/
+*.egg-info

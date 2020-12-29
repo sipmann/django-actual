@@ -1,0 +1,6 @@
+recursive-include django_actual/templates *
+recursive-include django_actual/static *
+include AUTHORS
+include LICENSE
+include MANIFEST.in
+include README.rst
