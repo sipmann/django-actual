@@ -3,6 +3,9 @@ Scaffolding
 
 After installing and configuring the `django_actual` app, you can start scaffolding apps. First let's see the supported field types.
 
+Field types
+-----------
+
 * char - CharField (default)
 * text - TextField
 * int - IntegerField
