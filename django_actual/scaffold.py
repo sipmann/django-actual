@@ -52,7 +52,7 @@ def %(lower_model)s_delete(request, id):
 
 MODEL_TEMPLATE = """
 class %s(models.Model):
-    %s
+%s
     update_date = models.DateTimeField(auto_now=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
@@ -193,10 +193,10 @@ urlpatterns = [
 """
 
 URL_EXISTS_CONTENT = """
-    path('', views.%(model)s_list, name='%(model)s-list'),
-    path('new', views.%(model)s_new, name='%(model)s-new'),
-    path('<int:id>', views.%(model)s_details, name='%(model)s-details'),
-    path('<int:id>/delete', views.%(model)s_delete, name='%(model)s-delete'),
+    path('%(model)s/', views.%(model)s_list, name='%(model)s-list'),
+    path('%(model)s/new', views.%(model)s_new, name='%(model)s-new'),
+    path('%(model)s/<int:id>', views.%(model)s_details, name='%(model)s-details'),
+    path('%(model)s/<int:id>/delete', views.%(model)s_delete, name='%(model)s-delete'),
 """
 
 ADMIN_CONTENT = """
@@ -424,6 +424,7 @@ class Scaffold(object):
             foreign = field[2]
 
             # Check if this foreign key is already in models.py
+            #TODO:If is the current model, skip the import
             if foreign in ('User', 'Group'):
                 if not self.is_imported('{0}{1}/models.py'.format(self.SCAFFOLD_APPS_DIR,
                                                                   self.app), foreign):
@@ -572,7 +573,6 @@ class Scaffold(object):
             self.imports = []
             fields = []
 
-            # TODO: Add charField to __str__
             charField = ''
             for field in self.fields:
                 new_field = self.get_field(field)
@@ -793,4 +793,4 @@ class Scaffold(object):
         self._info(' All Done ')
         self._info('===========')
         self._info("Add '{0}.apps.{0}Config' to the settings file".format(self.app))
-        self._info("Add path('{0}', include('{0}.urls'))) to the router file".format(self.app))
+        self._info("Add path('{0}', include('{1}.urls')) to the router file".format(self.app.lower(), self.app))
