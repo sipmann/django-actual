@@ -8,7 +8,13 @@ import shutil
 
 LIST_VIEW = """
 def %(lower_model)s_list(request, template='%(lower_model)s/list.html'):
-    return render(request, template, {'%(lower_model)s_list' : %(model)s.objects.all()})
+    rows = %(model)s.objects.all()
+    p = Paginator(rows, 7)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, template, {'%(lower_model)s_list' : page_object})
 """
 
 NEW_VIEW = """
@@ -118,6 +124,24 @@ TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
             </thead>
         {%% endfor %%}
         </table>
+
+        <nav aria-label="Page navigation">
+            <ul class="step-links">
+                {% if %(model)s_list.has_previous %}
+                    <li class="page-item" href="?page=1">&laquo; first</li>
+                    <li class="page-item" href="?page={{ %(model)s_list.previous_page_number }}">previous</li>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ %(model)s_list.number }} of {{ %(model)s_list.paginator.num_pages }}.
+                </span>
+
+                {% if %(model)s_list.has_next %}
+                    <li class="page-item" href="?page={{ %(model)s_list.next_page_number }}">next</li>
+                    <li class="page-item" href="?page={{ %(model)s_list.paginator.num_pages }}">last &raquo;</li>
+                {% endif %}
+            </ul>
+        </nav>
 
         <script>
             function ConfirmDelete(e) {
@@ -300,6 +324,7 @@ class Scaffold(object):
             need_import_JsonResponse = True
             need_import_form = True
             need_import_contrib = True
+            need_import_paginator = True
 
             for line in import_file.readlines():
                 if 'from django.shortcuts import render, redirect, get_object_or_404' in line:
@@ -323,6 +348,9 @@ class Scaffold(object):
                 if ('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app }) in line:
                     need_import_form = False
 
+                if 'from django.core.paginator import Paginator' in line:
+                    need_import_paginator = False
+
             if need_import_shortcut:
                 import_list.append(
                     'from django.shortcuts import render, redirect, get_object_or_404')
@@ -338,6 +366,8 @@ class Scaffold(object):
                 import_list.append('from django.contrib import messages')
             if need_import_form:
                 import_list.append('from %(app)s.forms import %(model)sForm' % { 'model': self.model, 'app': self.app })
+            if need_import_paginator:
+                import_list.append('from django.core.paginator import Paginator')
 
         return import_list
 
@@ -617,13 +647,8 @@ class Scaffold(object):
             self._info('create\t{0}{1}/templates/{2}/'.format(
                 self.SCAFFOLD_APPS_DIR, self.app, self.model.lower()), 1)
 
-        # Check if list.html exists
         self.create_view_file('list', TEMPLATE_LIST_CONTENT)
-
-        # Check if details.html exists
         self.create_view_file('details', TEMPLATE_DETAILS_CONTENT)
-
-        # Check if new.html exists
         self.create_view_file('new', TEMPLATE_NEW_CONTENT)
 
     def create_view_file(self, name, template):
