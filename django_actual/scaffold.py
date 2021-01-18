@@ -127,19 +127,19 @@ TEMPLATE_LIST_CONTENT = """{%% extends "base.html" %%}
 
         <nav aria-label="Page navigation">
             <ul class="step-links">
-                {% if %(model)s_list.has_previous %}
+                {%% if %(model)s_list.has_previous %%}
                     <li class="page-item" href="?page=1">&laquo; first</li>
                     <li class="page-item" href="?page={{ %(model)s_list.previous_page_number }}">previous</li>
-                {% endif %}
+                {%% endif %%}
 
                 <span class="current">
                     Page {{ %(model)s_list.number }} of {{ %(model)s_list.paginator.num_pages }}.
                 </span>
 
-                {% if %(model)s_list.has_next %}
+                {%% if %(model)s_list.has_next %%}
                     <li class="page-item" href="?page={{ %(model)s_list.next_page_number }}">next</li>
                     <li class="page-item" href="?page={{ %(model)s_list.paginator.num_pages }}">last &raquo;</li>
-                {% endif %}
+                {%% endif %%}
             </ul>
         </nav>
 
