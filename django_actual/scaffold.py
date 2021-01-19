@@ -12,9 +12,9 @@ def %(lower_model)s_list(request, template='%(lower_model)s/list.html'):
     p = Paginator(rows, 7)
 
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = p.get_page(page_number)
 
-    return render(request, template, {'%(lower_model)s_list' : page_object})
+    return render(request, template, {'%(lower_model)s_list' : page_obj})
 """
 
 NEW_VIEW = """
