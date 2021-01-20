@@ -9,6 +9,10 @@ import shutil
 LIST_VIEW = """
 def %(lower_model)s_list(request, template='%(lower_model)s/list.html'):
     rows = %(model)s.objects.all()
+    
+    if request.GET.get('order') is not None:
+        rows = rows.order_by(request.GET.get('order'))
+    
     p = Paginator(rows, 7)
 
     page_number = request.GET.get('page')
