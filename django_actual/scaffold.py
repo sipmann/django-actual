@@ -81,6 +81,9 @@ CHARFIELD_TEMPLATE = """    %(name)s = models.CharField(max_length=%(length)s, n
 BOOLEANFIELD_TEMPLATE = """    %(name)s = models.BooleanField(default=True, null=%(null)s, blank=%(null)s)
 """
 
+SLUGFIELD_TEMPLATE = """    %(name)s = models.SlugField(max_length=%(length)s, null=%(null)s, blank=%(null)s)
+"""
+
 TEXTFIELD_TEMPLATE = """    %(name)s = models.TextField(null=%(null)s, blank=%(null)s)
 """
 
@@ -497,6 +500,19 @@ class Scaffold(object):
                 null = 'True'
 
             return BOOLEANFIELD_TEMPLATE % {'name': field_name, 'null': null}
+        elif field_type.lower() == 'slug':
+            try:
+                length = field[2]
+            except IndexError:
+                length = 255
+                
+            try:
+                null = field[3]
+                null = 'False'
+            except IndexError:
+                null = 'True'
+
+            return SLUGFIELD_TEMPLATE % {'name': field_name, 'length': length, 'null': null}
         else:
             self._info("Field %s has unknow type %s" % (field_name, field_type.lower()))
 
